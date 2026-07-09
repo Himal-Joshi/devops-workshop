@@ -1,0 +1,35 @@
+
+from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
+
+
+# For summarization, we'll use a T5 model, which is well-suited for seq2seq tasks.
+
+# T5 models require a 'summarize:' prefix for summarization.
+
+tokenizer_s = AutoTokenizer.from_pretrained("t5-small")
+
+model_s = AutoModelForSeq2SeqLM.from_pretrained("t5-small")
+
+
+long_text = """\n    Hugging Face is an American company that develops tools for building applications using machine learning.
+\n    It is most known for its Transformers library, which provides open-source implementations of transformer models, \n    such
+as BERT and GPT-2. It also provides a platform that allows users to share machine learning models, \n    datasets, and web
+applications (demos). Hugging Face has been a key player in the democratization of AI, \n    making powerful models accessible
+to a wider audience. Their work has significantly accelerated research \n    and development in natural language processing
+(NLP) and other AI fields. The company was founded in 2016 \n    by Clément Delangue, Julien Chaumond, and Thomas Wolf.\n
+"""
+
+
+# Prepare input for T5 model (add 'summarize:' prefix)
+
+inputs_s = tokenizer_s("summarize: " + long_text, return_tensors="pt", max_length=512, truncation=True)
+
+summary_ids = model_s.generate(inputs_s.input_ids, max_length=50, min_length=20, length_penalty=2.0, num_beams=4,
+early_stopping=True)
+
+summary_text = tokenizer_s.decode(summary_ids[0], skip_special_tokens=True)
+
+
+print(f"Original Text:\n{long_text}\n")
+
+print(f"Summary:\n{summary_text}")
